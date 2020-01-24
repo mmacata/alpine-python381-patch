@@ -1,0 +1,76 @@
+From eb9ba2f66df2195a9c6295e73ab3d545a1445f05 Mon Sep 17 00:00:00 2001
+From: "Miss Islington (bot)"
+ <31488909+miss-islington@users.noreply.github.com>
+Date: Sun, 12 Jan 2020 03:41:07 -0800
+Subject: [PATCH] bpo-16575: Disabled checks for union types being passed by
+ value. (GH-17960) (GH-17964)
+
+Although the underlying libffi issue remains open, adding these
+checks have caused problems in third-party projects which are in
+widespread use. See the issue for examples.
+
+The corresponding tests have also been skipped.
+
+(cherry picked from commit c12440c371025bea9c3bfb94945f006c486c2c01)
+---
+ Lib/ctypes/test/test_structures.py |  3 ++-
+ Modules/_ctypes/_ctypes.c          | 18 ++++++++++++++++++
+ 2 files changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/Lib/ctypes/test/test_structures.py b/Lib/ctypes/test/test_structures.py
+index 19c4430bea344..cdbaa7fbd65ba 100644
+--- a/Lib/ctypes/test/test_structures.py
++++ b/Lib/ctypes/test/test_structures.py
+@@ -571,6 +571,7 @@ class U(Union):
+             self.assertEqual(f2, [0x4567, 0x0123, 0xcdef, 0x89ab,
+                                   0x3210, 0x7654, 0xba98, 0xfedc])
+
++    @unittest.skipIf(True, 'Test disabled for now - see bpo-16575/bpo-16576')
+     def test_union_by_value(self):
+         # See bpo-16575
+
+@@ -651,7 +652,7 @@ class Test5(Structure):
+         self.assertEqual(test5.nested.an_int, 0)
+         self.assertEqual(test5.another_int, 0)
+
+-    #@unittest.skipIf('s390' in MACHINE, 'Test causes segfault on S390')
++    @unittest.skipIf(True, 'Test disabled for now - see bpo-16575/bpo-16576')
+     def test_bitfield_by_value(self):
+         # See bpo-16576
+
+diff --git a/Modules/_ctypes/_ctypes.c b/Modules/_ctypes/_ctypes.c
+index c6da0d804453e..b10b86725ff17 100644
+--- a/Modules/_ctypes/_ctypes.c
++++ b/Modules/_ctypes/_ctypes.c
+@@ -2401,6 +2401,23 @@ converters_from_argtypes(PyObject *ob)
+     for (i = 0; i < nArgs; ++i) {
+         PyObject *cnv;
+         PyObject *tp = PyTuple_GET_ITEM(ob, i);
++/*
++ *      The following checks, relating to bpo-16575 and bpo-16576, have been
++ *      disabled. The reason is that, although there is a definite problem with
++ *      how libffi handles unions (https://github.com/libffi/libffi/issues/33),
++ *      there are numerous libraries which pass structures containing unions
++ *      by values - especially on Windows but examples also exist on Linux
++ *      (https://bugs.python.org/msg359834).
++ *
++ *      It may not be possible to get proper support for unions and bitfields
++ *      until support is forthcoming in libffi, but for now, adding the checks
++ *      has caused problems in otherwise-working software, which suggests it
++ *      is better to disable the checks.
++ *
++ *      Although specific examples reported relate specifically to unions and
++ *      not bitfields, the bitfields check is also being disabled as a
++ *      precaution.
++
+         StgDictObject *stgdict = PyType_stgdict(tp);
+
+         if (stgdict != NULL) {
+@@ -2428,6 +2445,7 @@ converters_from_argtypes(PyObject *ob)
+                 return NULL;
+             }
+         }
++ */
+
+         if (_PyObject_LookupAttrId(tp, &PyId_from_param, &cnv) <= 0) {
+             Py_DECREF(converters);
