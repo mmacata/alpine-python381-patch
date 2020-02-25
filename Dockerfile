@@ -22,4 +22,4 @@ RUN abuild -r
 
 # test
 USER root
-RUN apk add --allow-untrusted /home/abuild/packages/main/x86_64/python3-3.8.1-r1.apk
+RUN apk add --allow-untrusted /home/abuild/packages/main/x86_64/python3-3.8.1-r3.apk
