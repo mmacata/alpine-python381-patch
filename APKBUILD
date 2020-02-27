@@ -4,9 +4,8 @@
 pkgname=python3
 # the python3-tkinter's pkgver needs to be synchronized with this.
 pkgver=3.8.1
-_bluez_ver=5.53
 _basever="${pkgver%.*}"
-pkgrel=3
+pkgrel=0
 pkgdesc="A high-level scripting language"
 url="https://www.python.org/"
 arch="all"
@@ -18,7 +17,6 @@ makedepends="expat-dev openssl-dev zlib-dev ncurses-dev bzip2-dev xz-dev
 	sqlite-dev libffi-dev tcl-dev linux-headers gdbm-dev readline-dev
 	!gettext-dev"
 source="https://www.python.org/ftp/python/$pkgver/Python-$pkgver.tar.xz
-	https://www.kernel.org/pub/linux/bluetooth/bluez-$_bluez_ver.tar.xz
 	fix-xattrs-glibc.patch
 	musl-find_library.patch
 	ctypes.patch
@@ -40,7 +38,6 @@ prepare() {
 		Modules/_ctypes/darwin* \
 		Modules/_ctypes/libffi*
 
-	mv "$srcdir"/bluez-$_bluez_ver/lib "$srcdir"/bluez-$_bluez_ver/bluetooth
 }
 
 build() {
@@ -50,10 +47,7 @@ build() {
 	# seems some of the training tests hang on certain
 	# e.g. architectures (x86) possibly due to grsec or musl.
 
-	# Include bluez headers. Python only needs bluetooth/bluetoot.h and doesn't
-	# link against bluez. Depending on bluez-dev introduces a circular dep:
-	# Python -> bluez -> glib -> meson -> python
-	CFLAGS="$CFLAGS -I$srcdir/bluez-$_bluez_ver" ./configure \
+	./configure \
 		--prefix=/usr \
 		--disable-rpath \
 		--enable-ipv6 \
@@ -164,7 +158,6 @@ wininst() {
 }
 
 sha512sums="d41381848cc1ec8009643b71875f395a9ac2c8e12a5b1efef33caf8a9e99a337c790d4354695c85352d11b62092ae372b5af62f78724363fcbf3504ff9a6ddca  Python-3.8.1.tar.xz
-62956e6293ec2517ec453dc7a6c82d34a8c446df8add8fe411b0a45fd5604817f3a19fbc646ad6f68df435f3cd2bd10ae040890e30db83b022f90b54cc6b3c74  bluez-5.53.tar.xz
 37b6ee5d0d5de43799316aa111423ba5a666c17dc7f81b04c330f59c1d1565540eac4c585abe2199bbed52ebe7426001edb1c53bd0a17486a2a8e052d0f494ad  fix-xattrs-glibc.patch
 ab8eaa2858d5109049b1f9f553198d40e0ef8d78211ad6455f7b491af525bffb16738fed60fc84e960c4889568d25753b9e4a1494834fea48291b33f07000ec2  musl-find_library.patch
 bda9aaa2de7b679dd6ad0fd76bb2bfcc198584c77daae188cee0bbb4871c1b328abd5180b65f8d862b378dda46e467b5408fcd4a0159e4471b947b3e49df7c49  ctypes.patch"

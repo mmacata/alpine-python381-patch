@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.11
 
 RUN apk add abuild
 RUN apk add build-base expat-dev openssl-dev zlib-dev ncurses-dev bzip2-dev xz-dev sqlite-dev libffi-dev tcl-dev linux-headers gdbm-dev readline-dev bluez-dev
@@ -22,4 +22,4 @@ RUN abuild -r
 
 # test
 USER root
-RUN apk add --allow-untrusted /home/abuild/packages/main/x86_64/python3-3.8.1-r3.apk
+RUN apk add --allow-untrusted /home/abuild/packages/main/x86_64/python3-3.8.1-r0.apk
